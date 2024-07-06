@@ -114,10 +114,7 @@
 
 /obj/item/paper/attack_remote(mob/living/silicon/ai/user as mob)
 	var/dist
-	if(istype(user) && user.camera) //is AI
-		dist = get_dist(src, user.camera)
-	else //cyborg or AI not seeing through a camera
-		dist = get_dist(src, user)
+	dist = get_dist(src, user)
 	if(dist < 2)
 		read_paper(user)
 	else
@@ -408,10 +405,7 @@
 			if(!p.on)
 				to_chat(user, SPAN_NOTICE("Your pen is not on!"))
 				return
-		if ( istype(P, /obj/item/tool/pen/robopen) && P:mode == 2 )
-			P:RenamePaper(user,src)
-		else
-			show_browser(user, "<BODY class='paper'>[info_links][stamps]</BODY>", name, name) // Update the window
+		show_browser(user, "<BODY class='paper'>[info_links][stamps]</BODY>", name, name) // Update the window
 		//openhelp(user)
 		return
 
@@ -693,7 +687,7 @@
 				var/datum/reagent/R = GLOB.chemical_reagents_list["[I]"]
 				var/U = G.required_reagents[I]
 				txt += "<font size = \"2\"><I> - [U] [R.name]</I></font><BR>\n"
-			if(G.required_catalysts && G.required_catalysts.len)
+			if(LAZYLEN(G.required_catalysts))
 				txt += "<BR>\nWhile using the following catalysts: <BR>\n<BR>\n"
 				for(var/I in G.required_catalysts)
 					var/datum/reagent/R = GLOB.chemical_reagents_list["[I]"]
@@ -841,17 +835,16 @@
 			else
 				var/U = C.required_reagents[I]
 				info += "<font size = \"2\"><I> - [U] [R.name]</I></font><BR>\n"
-		if(C.required_catalysts)
-			if(C.required_catalysts.len)
-				info += "<BR>Reaction would require the following catalysts:<BR>\n"
-				for(var/I in C.required_catalysts)
-					var/datum/reagent/R = GLOB.chemical_reagents_list["[I]"]
-					if(R.chemclass >= CHEM_CLASS_SPECIAL && !GLOB.chemical_data.chemical_identified_list[R.id] && !info_only)
-						info += "<font size = \"2\"><I> - Unknown emission spectrum</I></font><BR>\n"
-						completed = FALSE
-					else
-						var/U = C.required_catalysts[I]
-						info += "<font size = \"2\"><I> - [U] [R.name]</I></font><BR>\n"
+		if(LAZYLEN(C.required_catalysts))
+			info += "<BR>Reaction would require the following catalysts:<BR>\n"
+			for(var/I in C.required_catalysts)
+				var/datum/reagent/R = GLOB.chemical_reagents_list["[I]"]
+				if(R.chemclass >= CHEM_CLASS_SPECIAL && !GLOB.chemical_data.chemical_identified_list[R.id] && !info_only)
+					info += "<font size = \"2\"><I> - Unknown emission spectrum</I></font><BR>\n"
+					completed = FALSE
+				else
+					var/U = C.required_catalysts[I]
+					info += "<font size = \"2\"><I> - [U] [R.name]</I></font><BR>\n"
 	else if(GLOB.chemical_gen_classes_list["C1"].Find(S.id))
 		info += "<font size = \"2\"><I> - [S.name]</I></font><BR>\n"
 	else
